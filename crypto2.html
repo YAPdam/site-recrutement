@@ -1,0 +1,619 @@
+<html><head><base href="https://websim.io/"><title>Interactive Skill Cards with Modal</title><style>
+:root {
+  --primary-color: #6200ee;
+  --secondary-color: #03dac6;
+  --background-color: #1A1A40; /* Bleu néon foncé pour une ambiance gaming */
+  /* Autres propriétés */
+  --surface-color: #e0e5ec;
+  --on-surface-color: #1d1d1d;
+  --on-primary-color: #ffffff;
+  --neumorphic-light: #ffffff;
+  --neumorphic-dark: #a3b1c6;
+  --purple-overlay: rgba(98, 0, 238, 0.2);
+}
+
+body {
+  background-color: var(--background-color); /* Garde la couleur de fond existante */
+  background-image: url('https://cdn-images-1.medium.com/max/1000/1*HtOBYW_yZi6PyPsoRRua4g.png'); /* Remplace par l'URL de ton image */
+  background-size: cover; /* Pour que l'image couvre tout l'écran */
+  background-position: center 20px; /* Pour centrer l'image */
+  background-repeat: no-repeat; /* Pour éviter la répétition de l'image */
+  }
+
+
+.container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  perspective: 1000px;
+}
+
+.skill-card {
+  position: absolute;
+  width: 200px;
+  height: 300px;
+  background-color: #2A2A50; 
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  box-shadow: 
+    0px 0px 15px #00ffff, /* Halo bleu fluo néon */
+    0 0 30px #00ffff,
+    0 0 45px #00ffff;
+  transition: transform 0.5s ease-out; /* Plus long pour une transformation plus douce */
+  cursor: pointer;
+  user-select: none;
+  overflow: hidden;
+}
+
+.skill-card:hover {
+  transform: scale(1.05) translateZ(10px); /* Réduit le zoom et la translation */
+}
+
+
+.skill-card:hover {
+  transform: scale(1.05) translateZ(20px);
+}
+
+.skill-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: contain;  /* Assure que l'image couvre toute la carte */
+  background-position: center;  /* Centre l'image */
+  background-repeat: no-repeat;  /* Empêche la répétition de l'image */
+  opacity: 0.2;
+  filter: grayscale(100%) sepia(20%) hue-rotate(260deg);
+  z-index: 0;
+}
+
+.skill-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  color: var(--primary-color);
+  position: relative;
+  z-index: 1;
+  color: #FFD700; /* Doré */
+}
+
+.skill-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  color: #FFD700; /* Doré */
+}
+
+.skill-description {
+  font-size: 14px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  color: #FFD700; /* Doré */
+}
+
+@keyframes fly {
+  0%, 100% {
+    transform: translate(var(--startX), var(--startY)) rotateX(var(--rotateX)) rotateY(var(--rotateY));
+  }
+  50% {
+    transform: translate(var(--midX1), var(--midY1)) rotateX(calc(var(--rotateX) * -1)) rotateY(calc(var(--rotateY) * -1));
+  }
+}
+
+
+.flying {
+  animation: fly var(--duration) infinite ease-in-out;
+}
+
+.dark-mode-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: var(--surface-color);
+  color: var(--on-surface-color);
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 
+    5px 5px 10px var(--neumorphic-dark),
+    -5px -5px 10px var(--neumorphic-light);
+  z-index: 1000;
+}
+
+.dark-mode-toggle:hover {
+  box-shadow: 
+    2px 2px 5px var(--neumorphic-dark),
+    -2px -2px 5px var(--neumorphic-light);
+}
+
+.dark-mode-toggle:active {
+  box-shadow: 
+    inset 2px 2px 5px var(--neumorphic-dark),
+    inset -2px -2px 5px var(--neumorphic-light);
+}
+
+body.dark-mode {
+  --background-color: #1a1a1a;
+  --surface-color: #2a2a2a;
+  --on-surface-color: #ffffff;
+  --neumorphic-light: #3a3a3a;
+  --neumorphic-dark: #151515;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  background-color: var(--surface-color);
+  margin: 5% auto;
+  padding: 20px;
+  border-radius: 15px;
+  width: 80%;
+  max-width: 800px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.modal-close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.modal-close:hover,
+.modal-close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modal-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  filter: grayscale(100%) sepia(20%) hue-rotate(260deg);
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.modal-description {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.modal-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #777;
+}
+
+.modal-skills {
+  margin-bottom: 20px;
+}
+
+.modal-skills h3 {
+  margin-bottom: 10px;
+}
+
+.skill-tag {
+  display: inline-block;
+  background-color: var(--primary-color);
+  color: var(--on-primary-color);
+  padding: 5px 10px;
+  border-radius: 20px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.modal-nav {
+  position: absolute;
+  top: 80px; /* Changed from 50px to 80px */
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.modal-nav button {
+  background-color: var(--primary-color);
+  color: var(--on-primary-color);
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+.modal-nav button:hover {
+  background-color: var(--secondary-color);
+}
+
+.skill-card::before,
+.modal-image {
+  filter: grayscale(100%) brightness(0.8) contrast(1.2);
+}
+
+.skill-card::after,
+.modal-image::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--purple-overlay);
+  pointer-events: none;
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head><body>
+<img src="https://cdn-images-1.medium.com/max/1000/1*j-gFOQi3mWsgfFd0f65_rg.png" alt="Image" class="top-left-image">
+<style>
+.top-left-image {
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 350px; /* Ajuste la taille de l'image selon tes besoins */
+    height: auto;
+}
+</style>
+  <!-- Le reste de ton contenu -->
+<a href="mailto:youplay@gmx.com" style="position: fixed; top: 20px; right: 20px; padding: 10px 20px; background-color: #fff; color: #000; text-decoration: none; border-radius: 10px; z-index: 1000;">
+  <i class="fas fa-envelope"></i> Contact Us
+</a>
+<div class="container" id="skillContainer">
+  <!-- Skill cards will be dynamically added here -->
+</div>
+<div id="skillModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeModal()">&times;</span>
+    <img class="modal-image" id="modalImage" src="" alt="Skill Image">
+    <h2 class="modal-title" id="modalTitle"></h2>
+    <p class="modal-description" id="modalDescription"></p>
+    <div class="modal-stats" id="modalStats"></div>
+    <div class="modal-skills">
+      <h3>Related Skills</h3>
+      <div id="modalSkills"></div>
+    </div>
+    <div class="modal-nav">
+      <button id="prevSkill" onclick="navigateSkills(-1)"><i class="fas fa-chevron-left"></i></button>
+      <button id="nextSkill" onclick="navigateSkills(1)"><i class="fas fa-chevron-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<script>
+const skillsData = [
+  {
+    id: 1,
+    icon: 'fas fa-code',
+    title: 'COMMUNITY MANAGER',
+    description: '',
+    detailDescription: 'Join Our Pirate Blockchain Adventure! Are you passionate and ready for an epic journey? We need a creative soul to build and engage our community in a world where pirates meet blockchain. No diploma required—just heart and drive. Set sail with us and make your mark!',
+    image: 'https://cdn-images-1.medium.com/max/1000/1*flKjdHwGOWve-EcTc2k73Q.png',
+    stats: {
+      experience: 'Beginners accepted',
+      projects: 'Send us examples if available',
+      languages: 'English + French'
+    },
+    relatedSkills: ['Discord', 'Content Strategy', 'Social Media Management', 'Content Creation', 'Data Analysis', 'Medium']
+  },
+  {
+    id: 2,
+    icon: 'fas fa-tasks',
+    title: 'PROJECT MANAGER',
+    description: 'Lead our pirate-themed blockchain adventure with precision and creativity.',
+    detailDescription: 'Are you ready to steer our pirate blockchain project to success? We need someone with a sharp mind and a steady hand to manage timelines, coordinate teams, and ensure everything runs smoothly. Beginners are welcome—what matters most is your drive to learn and excel.',
+    image: 'https://cdn-images-1.medium.com/max/1500/1*S1O9s_Mk4BVcUz-XH3tJ0A.png',
+    stats: {
+      experience: 'Beginners accepted',
+      projects: 'Send us examples if available',
+      languages: 'English + French'
+    },
+    relatedSkills: ['Project Management', 'Agile Methodology', 'Team Coordination', 'Budgeting', 'Risk Management']
+  },
+  {
+    id: 3,
+    icon: 'fas fa-code',
+    title: 'DEVELOPER',
+    description: 'Code the future of pirate-themed blockchain gaming.',
+    detailDescription: 'Are you eager to dive into the world of blockchain and gaming? We’re looking for a coder who can build the backbone of our pirate-themed adventure. Beginners are welcome—what we value most is your passion for coding and your willingness to learn.',
+    image: 'https://cdn-images-1.medium.com/max/1500/1*EWZEIvkWT6vuD7X98fx6rA.png',
+    stats: {
+      experience: 'Beginners accepted',
+      projects: 'Send us examples if available',
+      languages: 'JavaScript, Python, Solidity'
+    },
+    relatedSkills: ['Blockchain Development', 'Smart Contracts', 'Game Development', 'Web3', 'Backend Development']
+  },
+  {
+    id: 4,
+    icon: 'fas fa-pencil-ruler',
+    title: 'WEB DESIGNER',
+    description: 'Design the face of our pirate blockchain universe.',
+    detailDescription: 'Are you a creative web designer with a passion for digital experiences? We need someone to craft the interface for our pirate-themed blockchain game. Beginners are welcome—what matters is your creativity and eagerness to grow.',
+    image: 'https://cdn-images-1.medium.com/max/1500/1*yuHJvZdtuJ4lSYSOm4X_fA.png',
+    stats: {
+      experience: 'Beginners accepted',
+      projects: 'Send us examples if available',
+      languages: 'HTML, CSS, JavaScript'
+    },
+    relatedSkills: ['UI/UX Design', 'Responsive Design', 'Graphic Design', 'Prototyping', 'Adobe Creative Suite']
+  },
+  {
+    id: 5,
+    icon: 'fas fa-gamepad',
+    title: 'GAME DESIGNER',
+    description: 'Shape the gameplay of our pirate-themed blockchain adventure.',
+    detailDescription: 'Are you passionate about creating unique game experiences? We need a game designer who can bring our pirate blockchain game to life. Beginners are welcome—what counts is your creativity and desire to learn and improve.',
+    image: 'https://cdn-images-1.medium.com/max/1500/1*z65sEjjlc_lH5Mt8w95OJg.png',
+    stats: {
+      experience: 'Beginners accepted',
+      projects: 'Send us examples if available',
+      languages: 'English + French'
+    },
+    relatedSkills: ['Game Design', 'Level Design', 'Storytelling', 'Gameplay Mechanics', 'Prototyping']
+  },
+   {
+    id: 6,
+    icon: 'fas fa-drafting-compass',
+    title: 'UI/UX DESIGNER',
+    description: 'Craft seamless experiences for our pirate blockchain game.',
+    detailDescription: 'Are you a detail-oriented UI/UX designer with a passion for user-centered design? We’re looking for someone to create engaging interfaces for our game. Beginners are welcome—what’s most important is your enthusiasm to learn and craft user-friendly designs.',
+    image: 'https://cdn-images-1.medium.com/max/1000/1*_Wc5BH-VcWUvZZSJGQFhzw.png',
+    stats: {
+      experience: 'Beginners accepted',
+      projects: 'Send us examples if available',
+      languages: 'English + French'
+    },
+    relatedSkills: ['User Experience Design', 'User Interface Design', 'Wireframing', 'Prototyping', 'Interaction Design']
+  },
+  {
+    id: 7,
+    icon: 'fas fa-music',
+    title: 'SOUND DESIGNER',
+    description: 'Create the soundscape for our pirate blockchain adventure.',
+    detailDescription: 'Are you a sound designer who loves creating immersive audio? We need someone to craft the sounds that will bring our game to life. Beginners are welcome—what we’re looking for is your passion for sound and your desire to learn.',
+    image: 'https://cdn-images-1.medium.com/max/1500/1*ls4u2qVX7GyL3L-BYG0v1Q.png',
+    stats: {
+      experience: 'Beginners accepted',
+      projects: 'Send us examples if available',
+      languages: 'English + French'
+    },
+    relatedSkills: ['Sound Design', 'Audio Engineering', 'Music Composition', 'Field Recording', 'Mixing & Mastering']
+  },
+   {
+    id: 8,
+    icon: 'fas fa-bullhorn',
+    title: 'MARKETING / PR STRATEGIST',
+    description: 'Lead the charge in promoting our pirate blockchain game.',
+    detailDescription: 'Are you a strategic thinker with a flair for marketing and PR? We need someone to develop and execute our marketing strategy. Beginners are welcome—what matters most is your enthusiasm and willingness to learn and grow.',
+    image: 'https://cdn-images-1.medium.com/max/1000/1*0QYPBq9Xs7x9L5KP9iJ4bg.png',
+    stats: {
+      experience: 'Beginners accepted',
+      projects: 'Send us examples if available',
+      languages: 'English + French'
+    },
+    relatedSkills: ['Marketing Strategy', 'Public Relations', 'Social Media', 'Content Marketing', 'Brand Management']
+  },
+  {
+    id: 9,
+    icon: 'fas fa-paint-brush',
+    title: 'CONCEPT ARTIST',
+    description: 'Visualize the world of our pirate blockchain game.',
+    detailDescription: 'Are you a talented artist ready to bring ideas to life? We need a concept artist to visualize our game’s world. Beginners are welcome—what counts is your artistic passion and your eagerness to learn and contribute.',
+    image: 'https://cdn-images-1.medium.com/max/1000/1*VB4ITtC5GO9U64bdEJ297g.png',
+    stats: {
+      experience: 'Beginners accepted',
+      projects: 'Send us examples if available',
+      languages: 'English + French'
+    },
+    relatedSkills: ['Concept Art', 'Character Design', 'Environment Design', 'Digital Painting', 'Illustration']
+  },
+  {
+    id: 10,
+    icon: 'fas fa-bug',
+    title: 'QA TESTER',
+    description: 'Ensure our pirate blockchain game is flawless.',
+    detailDescription: 'Are you detail-oriented and passionate about quality? We’re looking for a QA Tester to meticulously test our game. Beginners are welcome—what’s essential is your drive to ensure the best possible gaming experience and your eagerness to learn.',
+    image: 'https://cdn-images-1.medium.com/max/1000/1*D4DCtRE6rpLQULsRbIqD2Q.png',
+    stats: {
+      experience: 'Beginners accepted',
+      projects: 'Send us examples if available',
+      languages: 'English + French'
+    },
+    relatedSkills: ['Bug Reporting', 'Quality Assurance', 'Gameplay Testing', 'Attention to Detail', 'Critical Thinking']
+  }
+];
+
+let currentSkillIndex = 0;
+
+function createSkillCard(skill) {
+  const card = document.createElement('div');
+  card.className = 'skill-card flying';
+  card.innerHTML = `
+    <div class="skill-icon"><i class="${skill.icon}"></i></div>
+    <div class="skill-title">${skill.title}</div>
+    <div class="skill-description">${skill.description}</div>
+  `;
+  
+  // Set background image
+  card.style.setProperty('--background-image', `url(${skill.image})`);
+  card.style.backgroundImage = `url('https://cdn-images-1.medium.com/max/1000/1*aLmRjbo7P-RR6f1MUwexUA.png')`;
+  
+  // Set random flying animation properties
+  const startX = Math.random() * 80 - 3;
+  const startY = Math.random() * 80 - 3;
+  card.style.setProperty('--startX', `${startX}vw`);
+  card.style.setProperty('--startY', `${startY}vh`);
+  card.style.setProperty('--midX1', `${startX + Math.random() * 60 - 30}vw`);
+  card.style.setProperty('--midY1', `${startY + Math.random() * 60 - 30}vh`);
+  card.style.setProperty('--midX2', `${startX + Math.random() * 60 - 30}vw`);
+  card.style.setProperty('--midY2', `${startY + Math.random() * 60 - 30}vh`);
+  card.style.setProperty('--midX3', `${startX + Math.random() * 60 - 30}vw`);
+  card.style.setProperty('--midY3', `${startY + Math.random() * 60 - 30}vh`);
+  card.style.setProperty('--rotateX', `${Math.random() * 0}deg`);
+  card.style.setProperty('--rotateY', `${Math.random() * 180}deg`);
+  card.style.setProperty('--duration', `${10 + Math.random() * 10}s`);
+  
+  card.addEventListener('click', () => openModal(skill.id));
+  
+  return card;
+}
+
+function initializeSkillCards() {
+  const container = document.getElementById('skillContainer');
+  const totalCards = 10;
+  
+  for (let i = 0; i < totalCards; i++) {
+    const skill = skillsData[i % skillsData.length];
+    const card = createSkillCard(skill);
+    container.appendChild(card);
+  }
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+  const darkModeToggle = document.querySelector('.dark-mode-toggle i');
+  if (document.body.classList.contains('dark-mode')) {
+    darkModeToggle.classList.remove('fa-moon');
+    darkModeToggle.classList.add('fa-sun');
+  } else {
+    darkModeToggle.classList.remove('fa-sun');
+    darkModeToggle.classList.add('fa-moon');
+  }
+}
+
+function openModal(skillId) {
+  currentSkillIndex = skillsData.findIndex(s => s.id === skillId);
+  updateModal();
+  document.getElementById('skillModal').style.display = 'block';
+}
+
+function closeModal() {
+  document.getElementById('skillModal').style.display = 'none';
+}
+
+function updateModal() {
+  const skill = skillsData[currentSkillIndex];
+  document.getElementById('modalImage').src = skill.image;
+  document.getElementById('modalTitle').textContent = skill.title;
+  document.getElementById('modalDescription').textContent = skill.detailDescription;
+
+  const statsContainer = document.getElementById('modalStats');
+  statsContainer.innerHTML = '';
+  for (const [key, value] of Object.entries(skill.stats)) {
+    statsContainer.innerHTML += `
+      <div class="stat">
+        <div class="stat-value">${value}</div>
+        <div class="stat-label">${key}</div>
+      </div>
+    `;
+  }
+
+  const skillsContainer = document.getElementById('modalSkills');
+  skillsContainer.innerHTML = '';
+  skill.relatedSkills.forEach(relatedSkill => {
+    skillsContainer.innerHTML += `<span class="skill-tag">${relatedSkill}</span>`;
+  });
+}
+
+function navigateSkills(direction) {
+  currentSkillIndex = (currentSkillIndex + direction + skillsData.length) % skillsData.length;
+  updateModal();
+}
+
+// Initialize the skill cards
+initializeSkillCards();
+
+// Add interactivity to cards
+document.addEventListener('mousemove', (e) => {
+  const cards = document.querySelectorAll('.skill-card');
+  const mouseX = e.clientX / window.innerWidth - 0.5;
+  const mouseY = e.clientY / window.innerHeight - 0.5;
+  
+  cards.forEach((card) => {
+    const rect = card.getBoundingClientRect();
+    const cardCenterX = rect.left + rect.width / 2;
+    const cardCenterY = rect.top + rect.height / 2;
+    
+    const angleX = (cardCenterY - e.clientY) / 30;
+    const angleY = (e.clientX - cardCenterX) / 30;
+    
+    card.style.transform = `rotateX(${angleX}deg) rotateY(${angleY}deg) scale(1.05)`;
+  });
+});
+
+document.addEventListener('mouseleave', () => {
+  const cards = document.querySelectorAll('.skill-card');
+  cards.forEach((card) => {
+    card.style.transform = '';
+  });
+});
+
+// Close modal when clicking outside of it
+window.onclick = function(event) {
+  const modal = document.getElementById('skillModal');
+  if (event.target == modal) {
+    closeModal();
+  }
+}
+</script>
+</body></html>
